@@ -41,10 +41,10 @@ with col1:
     st.title("Where's my Bus (Depot) (BETA)")
 with col2:
     st.logo(
-    logo_path,
-    link=None,
-    icon_image=logo_path,
-)
+        logo_path,
+        link=None,
+        icon_image=logo_path,
+    )
 
 # Function to get user location using streamlit_js_eval
 def get_user_location():
@@ -61,7 +61,7 @@ def is_within_bounds(lat, lon, bounds):
     point = Point(lon, lat)
     return polygon.contains(point)
 
-# Define boundaries for Greenpoint, Zerega, Conner, Jamaica, and Richmond Terrace depots
+# Define boundaries for depots
 greenpoint_bounds = [
     [-73.94226338858698, 40.72931657250524],
     [-73.94226338858698, 40.72698871645508],
@@ -97,6 +97,14 @@ richmond_terrace_bounds = [
     [-74.12692989053916, 40.64051079380465]
 ]
 
+# New Sharrotts depot bounds
+sharrotts_bounds = [
+    [-74.24196409313406, 40.54024199200984],
+    [-74.24196409313406, 40.53846294386625],
+    [-74.2407447373859, 40.53846294386625],
+    [-74.2407447373859, 40.54024199200984]
+]
+
 # Function to switch to the appropriate tab based on user location
 def switch_to_nearest_tab():
     if st.session_state['user_lat'] and st.session_state['user_lon']:
@@ -110,11 +118,15 @@ def switch_to_nearest_tab():
             st.session_state['current_tab'] = 'Jamaica'
         elif is_within_bounds(st.session_state['user_lat'], st.session_state['user_lon'], richmond_terrace_bounds):
             st.session_state['current_tab'] = 'Richmond Terrace'
+        elif is_within_bounds(st.session_state['user_lat'], st.session_state['user_lon'], sharrotts_bounds):
+            st.session_state['current_tab'] = 'Sharrotts'
         else:
             st.warning("You are not within any defined bus yard boundaries.")
+        st.write("Current tab set to:", st.session_state['current_tab'])  # Debugging output
 
 switch_to_nearest_tab()
-#st.session_state['current_tab'] = 'Greenpoint'
+# st.session_state['current_tab'] = 'Greenpoint'
+
 # Function to clean and normalize the vehicle name
 def clean_vehicle_name(vehicle_name):
     vehicle_name = vehicle_name.upper().strip()
@@ -144,36 +156,46 @@ def display_bus_location():
             try:
                 device_statuses = api.get('DeviceStatusInfo', search={'deviceSearch': {'id': geotab_id}})
 
-
                 if device_statuses:
                     device_status = device_statuses[0]
                     bus_lat = device_status.get('latitude', None)
                     bus_lon = device_status.get('longitude', None)
-                    #vehicle_name = device_status.get('device', {}).get('name', 'Unknown Vehicle')
-                    #st.write(device_status)
 
                     if bus_lat and bus_lon:
+                        st.write("Bus coordinates:", bus_lat, bus_lon)  # Debugging output
                         # Check if the bus is within the bounds of any depot
                         if (is_within_bounds(bus_lat, bus_lon, greenpoint_bounds) or 
                             is_within_bounds(bus_lat, bus_lon, zerega_bounds) or
                             is_within_bounds(bus_lat, bus_lon, conner_bounds) or
                             is_within_bounds(bus_lat, bus_lon, jamaica_bounds) or
-                            is_within_bounds(bus_lat, bus_lon, richmond_terrace_bounds)):
+                            is_within_bounds(bus_lat, bus_lon, richmond_terrace_bounds) or
+                            is_within_bounds(bus_lat, bus_lon, sharrotts_bounds)):
 
                             # Center the map on the bus location
-                            m = folium.Map(location=[bus_lat, bus_lon], zoom_start=19, tiles=f"https://api.mapbox.com/styles/v1/vr00n-nycsbus/cm0404e2900bj01qvc6c381fn/tiles/256/{{z}}/{{x}}/{{y}}@2x?access_token={mapbox_token}", attr="Mapbox")
+                            m = folium.Map(location=[bus_lat, bus_lon], zoom_start=19, 
+                                tiles=f"https://api.mapbox.com/styles/v1/vr00n-nycsbus/cm0404e2900bj01qvc6c381fn/tiles/256/{{z}}/{{x}}/{{y}}@2x?access_token={mapbox_token}", 
+                                attr="Mapbox")
 
                             # Add bus marker
-                            folium.Marker([bus_lat, bus_lon], popup=f'{vehicle_name}', icon=folium.Icon(color='red', icon='bus', prefix='fa')).add_to(m)
+                            folium.Marker(
+                                [bus_lat, bus_lon], 
+                                popup=f'{vehicle_name}', 
+                                icon=folium.Icon(color='red', icon='bus', prefix='fa')
+                            ).add_to(m)
 
                             # Add user location marker if available
                             if st.session_state['user_lat'] and st.session_state['user_lon']:
-                                folium.Marker([st.session_state['user_lat'], st.session_state['user_lon']], popup='Your Location', icon=folium.Icon(color='blue', icon='user', prefix='fa')).add_to(m)
+                                folium.Marker(
+                                    [st.session_state['user_lat'], st.session_state['user_lon']], 
+                                    popup='Your Location', 
+                                    icon=folium.Icon(color='blue', icon='user', prefix='fa')
+                                ).add_to(m)
 
+                            st.write("The bus is inside a defined depot boundary.")  # Debugging output
                             # Optimize map for mobile view
                             folium_static(m, width=350, height=500)
                         else:
-                            st.error("The bus is not currently inside a depot. For privacy reasons, we annot show it's location.")
+                            st.error("The bus is not currently inside a depot. For privacy reasons, we cannot show its location.")
                     else:
                         st.error("Bus location not available.")
                 else:
