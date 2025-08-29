@@ -39,6 +39,8 @@ logo_path = "nycsbus-small-logo.png"
 col1, col2 = st.columns([0.8, 0.2])
 with col1:
     st.title("Where's my Bus (Depot)")
+    st.subheader("For security reasons, this only works if you are located in a NYCSBUS depot")
+
 with col2:
     st.logo(
         logo_path,
