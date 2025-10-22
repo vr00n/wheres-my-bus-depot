@@ -42,7 +42,7 @@ with col1:
     st.subheader("For security reasons, this only works if you are located in a NYCSBUS depot")
 
 with col2:
-    st.logo(
+    st.image(
         logo_path,
         link=None,
         icon_image=logo_path,
