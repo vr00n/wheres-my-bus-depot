@@ -42,7 +42,14 @@ with col1:
     st.subheader("For security reasons, this only works if you are located in a NYCSBUS depot")
 
 with col2:
-    st.image(logo_path, use_column_width=True)
+    st.markdown(
+        f'''
+        <div style="display:flex;justify-content:flex-end">
+            <img src="{logo_path}" alt="NYCSBUS" style="height:50%;max-height:40px;"/>
+        </div>
+        ''',
+        unsafe_allow_html=True
+    )
 
 # Function to get user location using streamlit_js_eval
 def get_user_location():
