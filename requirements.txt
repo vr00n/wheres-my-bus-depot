@@ -1,9 +1,12 @@
-streamlit>=1.30,<2
-altair>=5.0,<6
+streamlit==1.32.2
+altair>=5,<6
+
+pandas==2.2.3
+numpy<2  # keeps binary wheels + avoids downstream surprises
+
 streamlit-folium==0.26.1
 streamlit-js-eval==1.0.0
 folium==0.20.0
 shapely==2.1.2
-pandas==3.0.0
 mygeotab==0.9.4
 requests==2.32.5
