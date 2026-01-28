@@ -16,7 +16,7 @@ if 'current_tab' not in st.session_state:
 
 # Mapbox token and style
 
-MAPBOX_TOKEN: str = st.secrets["mapbox_token"]
+mapbox_token = st.secrets["mapbox_token"]
 mapbox_style = "mapbox://styles/vr00n-nycsbus/cm0404e2900bj01qvc6c381fn"
 
 # Function to authenticate with Geotab and get devices
